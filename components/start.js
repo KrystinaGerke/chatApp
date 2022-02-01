@@ -20,7 +20,8 @@ export class Start extends React.Component {
     this.state = { 
       name: '',
       bgColor: '',
-  } };
+  }
+};
 
 
 
@@ -69,9 +70,7 @@ export class Start extends React.Component {
 
         
         <View style={styles.button}>
-          <Button color='#757083' style={styles.buttonHeight}
-          title="Start Chatting" 
-          onPress={() => this.props.navigation.navigate('Chat', { name: this.state.name, bgColor: this.state.bgColor } )}/> 
+          <TouchableOpacity style={styles.buttonHeight} onPress={() => this.props.navigation.navigate('Chat', { name: this.state.name, bgColor: this.state.bgColor } )}><Text style={styles.buttonText}>Start Chatting</Text></TouchableOpacity> 
         </View>
 
 
@@ -112,23 +111,35 @@ const styles = StyleSheet.create({
      justifyContent: 'center', 
       alignItems: 'center' 
    },
+   
    image:{
      justifyContent:'center',
      width: '100%',
      height: '100%'
    },
+
    button: {
-     
+    height: 70, 
      width: '88%',
+     marginBottom: -15,
    },
-   buttonHeight: {
-     minHeight: 70,
-     paddingVertical: 500,
-     color: '#FFFFFF',
+
+   buttonHeight: { 
      backgroundColor: '#757083',
+     height: 60, 
+     width: '100%',
+     flexDirection: 'row',
+     justifyContent: 'space-around',
+     alignItems: 'stretch'
+   },
+
+   buttonText: {
+     color: '#FFFFFF',
      fontSize: 16,
      fontWeight: 'bold',
+     marginTop:15,
    },
+
    color: { 
      width: 50,
      height: 50,
@@ -180,30 +191,34 @@ const styles = StyleSheet.create({
   input: {
     alignItems: "flex-start",
     flexDirection: "row",
-    height: 50,
+    height: 60,
     width: '88%',
-    fontSize: 16,
-    fontWeight: '300',
-    color: '#757083',
-   opacity: .5,
    borderColor: '#757083',
    borderWidth: 1,
    position: 'relative',
-   
+   marginTop: -5,
+   marginBottom: -5,
 
   },
   icon: {
     margin: 10,
-    opacity: .50, 
+    opacity: .5, 
   },
   inputText: {
-    marginTop:9,
+    marginTop:15,
     marginLeft: 2,
+    opacity: .5,
+    fontSize: 16,
+    fontWeight: '300',
+    color: '#757083',
   },
   colorText: {
-    color: '#757083', 
-    opacity: .5,
+    color: '#757083',
+    fontWeight: '300', 
+    fontSize: 16,
+    opacity: 1,
     marginBottom: 9,
+    marginLeft: 5,
   },
   colorTextBox: {
     alignItems: "stretch",

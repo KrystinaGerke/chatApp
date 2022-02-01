@@ -1,16 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 
 export class Chat extends React.Component {
-  render() {
-    let name = this.props.route.params.name;
-    let bgColor = this.props.route.params.bgColor;
-  // OR ...
-    // let { name } = this.props.route.params;
+  
+    componentDidMount(){
+        let name = this.props.route.params.name;
+        this.props.navigation.setOptions({ title: name });
+        }
+  
 
-    this.props.navigation.setOptions({ title: name });
 
+    render() {
+
+     let bgColor = this.props.route.params.bgColor;
 
     return (
       <View style={styles.container}>
