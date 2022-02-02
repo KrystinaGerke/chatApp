@@ -2,7 +2,19 @@ import React from 'react';
 import { View, StyleSheet} from 'react-native';
 import { Bubble, Day, SystemMessage, GiftedChat } from 'react-native-gifted-chat';
 import { Platform, KeyboardAvoidingView } from 'react-native';
+import * as firebase from 'firebase';
+import "firebase/firestore";
 
+
+//configuring firebase keys
+const firebaseConfig = {
+  apiKey: "AIzaSyD5ywqNz_umYt053y1yuqMrDIJKjbhbsUk",
+  authDomain: "chatapp-6c06a.firebaseapp.com",
+  projectId: "chatapp-6c06a",
+  storageBucket: "chatapp-6c06a.appspot.com",
+  messagingSenderId: "666952714959",
+  appId: "1:666952714959:web:fb5d02e71a2298c747c5ba"
+};
 
 
 export class Chat extends React.Component {
@@ -10,41 +22,99 @@ export class Chat extends React.Component {
     super();
     this.state = {
       messages: [],
-    }
+      uid: 0,
+      user: {
+        _id: "",
+        name: "",
+        avatar: "",
+      },
+    };
+
+
+  //initializing firebase
+  if (!firebase.apps.length){
+    firebase.initializeApp(firebaseConfig);
+  }
+   // reference to the Firestore messages collection
+   this.referenceChatMessages = firebase.firestore().collection('messages');
+   this.refMsgsUser = null;
+
   };
+
+    // when updated set the messages state with the current data 
+    onCollectionUpdate = (querySnapshot) => { 
+      const messages = [];
+      // go through each document
+      querySnapshot.forEach((doc) => {
+        // get the QueryDocumentSnapshot's data
+        let data = doc.data();
+        messages.push({
+          _id: data._id,
+          text: data.text,
+          createdAt: data.createdAt.toDate(),
+          user: {
+            _id: data.user._id,
+            name: data.user.name,
+            avatar: data.user.avatar
+          }
+        });
+      });
+      this.setState({
+        messages: messages
+      });
+    };
 
   componentDidMount() {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
- // OR ...
-    // let { name } = this.props.route.params;
-    this.setState({
-      messages: [
-        {
-          _id: 1,
-          text: "My first message!",
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: "Chatbob",
-            avatar: "https://placeimg.com/140/140/any",
-          },
+
+     // user authentication
+     this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
+    
+       //update user state with currently active user data
+       this.setState({
+        uid: user.uid,
+        messages: [],
+        user: {
+          _id: user.uid,
+          name: name,
+          avatar: "https://placeimg.com/140/140/any",
         },
-        {
-          _id: 2,
-          text: "You entered the chat",
-          createdAt: new Date(),
-          system: true,
-        },
-      ],
-    })
+      });
+      // listens for updates in the collection
+      this.unsubscribe = this.referenceChatMessages
+        .orderBy("createdAt", "desc")
+        .onSnapshot(this.onCollectionUpdate)
+    });
+
   };
 
+
+  // Add messages to database
+  addMessages() { 
+    const message = this.state.messages[0];
+    // add a new messages to the collection
+    this.referenceChatMessages.add({
+      _id: message._id,
+      text: message.text || null,
+      createdAt: message.createdAt,
+      user: {
+        _id: message.user._id,
+        name: message.user.name,
+        avatar: message.user.avatar
+      } 
+    });
+  }
 
   onSend(messages = []) {
     this.setState((previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }));
+     }), () => {
+      this.addMessages();
+    })
   };
 
 renderBubble(props) {
@@ -59,6 +129,13 @@ renderBubble(props) {
     />
   )
 };
+
+
+componentWillUnmount() {
+  //unsubscribe from collection updates
+  this.authUnsubscribe();
+  this.unsubscribe();
+}
 
 
 // changes for system messages
@@ -102,7 +179,9 @@ renderSystemMessage(props) {
         messages={this.state.messages}
         onSend={(messages) => this.onSend(messages)}
         user={{
-          _id: 1,
+          _id: this.state.user._id,
+          name: this.state.name,
+          avatar: this.state.user.avatar
         }}
       />
       
