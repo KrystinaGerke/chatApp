@@ -41,6 +41,8 @@ export class Chat extends React.Component {
 
   };
 
+  
+
   componentDidMount() {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
@@ -76,13 +78,9 @@ export class Chat extends React.Component {
     // add a new messages to the collection
     this.referenceChatMessages.add({
       _id: message._id,
-      text: message.text || null,
+      text: message.text || "",
       createdAt: message.createdAt,
-      user: {
-        _id: message.user._id,
-        name: message.user.name,
-        avatar: message.user.avatar
-      } 
+      user: this.state.user
     });
   }
 
