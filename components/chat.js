@@ -4,8 +4,11 @@ import { Bubble, Day, SystemMessage, GiftedChat, InputToolbar } from 'react-nati
 import { Platform, KeyboardAvoidingView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import MapView from 'react-native-maps';
+import CustomActions from './CustomActions';
 import * as firebase from 'firebase';
 import "firebase/firestore";
+import CustomActions from './CustomActions';
 
 
 //configuring firebase keys
@@ -32,7 +35,8 @@ export class Chat extends React.Component {
 				avatar: '',
 			},
       isConnected: false,
-
+      image: null,
+      location: null
     };
 
     //initialize firebase
@@ -62,6 +66,8 @@ export class Chat extends React.Component {
 					name: data.user.name,
 					avatar: data.user.avatar,
 				},
+        image: data.image || null,
+        location: data.location || null,
 			});
 		});
 		this.setState({
@@ -173,11 +179,35 @@ addMessages() {
     _id: message._id,
     text: message.text || '',
     createdAt: message.createdAt,
-    user: this.state.user
+    user: this.state.user,
+    image: message.image || "",
+    location: message.location || null
   });
 }
 
+ // Returns a mapview when user adds a location to current message
+ renderCustomView(props) {
+  const { currentMessage } = props;
+  if (currentMessage.location) {
+    return (
+      <MapView
+        style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+        region={{
+          latitude: currentMessage.location.latitude,
+          longitude: currentMessage.location.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+      />
+    );
+  }
+  return null;
+ }
 
+ // action button to access custom features
+ renderCustomActions(props) {
+  return <CustomActions {...props} />;
+}
 
 //attaches messages to chat
 onSend(messages = []) {
@@ -230,7 +260,7 @@ renderSystemMessage(props) {
     );
   }
 
-  //customizes input toolbar (hide if offline)
+  //customizes input toolbar if online
   renderInputToolbar(props) {
 		if (this.state.isConnected == false) {
 		} else {
@@ -266,6 +296,8 @@ renderSystemMessage(props) {
   renderSystemMessage={this.renderSystemMessage.bind(this)}
   renderDay={this.renderDay.bind(this)}
   renderInputToolbar={this.renderInputToolbar.bind(this)}
+  renderActions={this.renderCustomActions}
+  renderCustomView={this.renderCustomView}
         messages={this.state.messages}
         onSend={(messages) => this.onSend(messages)}
         user={{
