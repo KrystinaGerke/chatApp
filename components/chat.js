@@ -8,7 +8,6 @@ import MapView from 'react-native-maps';
 import CustomActions from './CustomActions';
 import * as firebase from 'firebase';
 import "firebase/firestore";
-import CustomActions from './CustomActions';
 
 
 //configuring firebase keys
